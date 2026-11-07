@@ -4,13 +4,13 @@ Qodo's organization-wide configuration for the `ptr727` repositories.
 
 ## Purpose
 
-[Qodo][qodo-link] reads a repository named `pr-agent-settings` under an organization or account as that owner's central configuration. It reads `.pr_agent.toml` from this repository's default branch for any repository that carries no `.pr_agent.toml` of its own on its default branch. A repository that carries one uses its own file instead.
+[Qodo][qodo-link] reads a repository named `pr-agent-settings` under an organization or account as that owner's central configuration. It reads `.pr_agent.toml` from this repository's default branch for every repository under the owner. A repository carrying its own `.pr_agent.toml` on its default branch overrides each key that file sets, and inherits the rest from here.
 
-A fleet repository chooses which reviewers run, on which branches, and when, in its own `.github/agent-policy.json`. That file is rendered from the [ProjectTemplate][projecttemplate-link] registry, together with the repository's `.coderabbit.yaml` and `.pr_agent.toml`. So the default here covers only a repository that has not received its rendered files yet. It turns automatic feedback off, so it starts no review nobody asked for.
+A fleet repository chooses which reviewers run, on which branches, and when, in its own `.github/agent-policy.json`. That file is rendered from the [ProjectTemplate][projecttemplate-link] registry, together with the repository's `.coderabbit.yaml` and `.pr_agent.toml`. Every rendered `.pr_agent.toml` sets `config.disable_auto_feedback`. So once present, that key here reaches only a repository the registry renders no files for, such as a new one. It turns automatic feedback off, so it starts no review nobody asked for.
 
 ## Status
 
-This repository holds no `.pr_agent.toml` yet. Qodo reads a repository's own file only from its default branch. So a central default with automatic feedback off would silence Qodo wherever a rendered file has not reached `main`. The central file is added once each fleet repository carries its rendered `.pr_agent.toml` on `main`.
+Qodo reads a repository's own file only from its default branch. So a central default with automatic feedback off silences Qodo wherever a repository's own file has not reached that branch. `.pr_agent.toml` is therefore present here only while every fleet repository carries its own `.pr_agent.toml` on its default branch, setting `config.disable_auto_feedback`. [`scripts/central_config.py`][central-config-link] `write` adds the file when that holds and removes it when it does not.
 
 ## Where the Rules Live
 
@@ -23,7 +23,7 @@ This repository holds configuration only. The rules it serves live in ProjectTem
 
 ## Changing the Configuration
 
-Change this repository through a pull request, and only alongside the matching change to the ProjectTemplate review policy. A change here alters review behavior across every repository that carries no `.pr_agent.toml` of its own. The [configuration reference][qodo-config-link] names each option.
+ProjectTemplate writes this repository with [`scripts/central_config.py`][central-config-link]. Make a change there and carry it here by a pull request. Never edit this repository in place. The [configuration reference][qodo-config-link] names each option.
 
 <!-- External links -->
 [projecttemplate-link]: https://github.com/ptr727/ProjectTemplate
@@ -33,6 +33,7 @@ Change this repository through a pull request, and only alongside the matching c
 <!-- ProjectTemplate links -->
 [agent-policy-default-link]: https://github.com/ptr727/ProjectTemplate/blob/main/spec/agent-policy.default.json
 [agent-policy-schema-link]: https://github.com/ptr727/ProjectTemplate/blob/main/spec/agent-policy.schema.json
+[central-config-link]: https://github.com/ptr727/ProjectTemplate/blob/main/scripts/central_config.py
 [governance-link]: https://github.com/ptr727/ProjectTemplate/blob/main/GOVERNANCE.md#pr-review-etiquette
 [repo-config-link]: https://github.com/ptr727/ProjectTemplate/blob/main/docs/repo-config.md
 [reviewer-reference-link]: https://github.com/ptr727/ProjectTemplate/blob/main/docs/pr-reviewer-reference.md
